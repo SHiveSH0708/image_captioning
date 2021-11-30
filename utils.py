@@ -143,7 +143,17 @@ def validate(val_loader, encoder, decoder, criterion, vocab, epoch,
             total_bleu_4 += batch_bleu_4 / len(outputs)
 
             # Calculate the batch loss
-            loss = criterion(outputs.view(-1, len(vocab)), captions.view(-1))
+            
+            
+            pseudo_caption = torch.ones(captions.view(-1).shape[0], 8856)
+            pseudo_caption = pseudo_caption.float()*-1
+            for i in range(captions.view(-1).shape[0]):
+              pseudo_caption[i][0] = captions.view(-1)[i]
+
+            # print(type(pseudo_caption.type(torch.LongTensor)))
+            # Calculate the batch loss
+            loss = criterion(outputs.view(-1, vocab_size), pseudo_caption.type(torch.LongTensor).cuda())
+            # loss = criterion(outputs.view(-1, len(vocab)), captions.view(-1))
             total_loss += loss.item()
             
             # Get validation statistics
