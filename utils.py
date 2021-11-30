@@ -44,7 +44,7 @@ def train(train_loader, encoder, decoder, criterion, optimizer, vocab_size,
         # Pass the inputs through the CNN-RNN model
         features = encoder(images)
         outputs = decoder(features, captions)
-        pseudo_caption = torch.ones(captions.view(-1).shape[0], 8855)
+        pseudo_caption = torch.ones(captions.view(-1).shape[0], 8856)
         pseudo_caption = pseudo_caption.float()*-1
         for i in range(captions.view(-1).shape[0]):
           pseudo_caption[i][0] = captions.view(-1)[i]
@@ -135,7 +135,7 @@ def validate(val_loader, encoder, decoder, criterion, vocab, epoch,
                     predicted_ids.append(scores.argmax().item())
                 # Convert word ids to actual words
                 predicted_word_list = word_list(predicted_ids, vocab)
-                caption_word_list = word_list(captions[i].numpy(), vocab)
+                caption_word_list = word_list(captions[i].cpu().numpy(), vocab)
                 # Calculate Bleu-4 score and append it to the batch_bleu_4 list
                 batch_bleu_4 += sentence_bleu([caption_word_list], 
                                                predicted_word_list, 
