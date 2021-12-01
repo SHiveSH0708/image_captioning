@@ -27,6 +27,8 @@ def train(train_loader, encoder, decoder, criterion, optimizer, vocab_size,
     start_train_time = time.time()
 
     for i_step in range(start_step, total_step + 1):
+        # if i_step==10:
+        #   break
         # Randomly sample a caption length, and sample indices with that length
         indices = train_loader.dataset.get_indices()
         # Create a batch sampler to retrieve a batch with the sampled indices
@@ -44,7 +46,7 @@ def train(train_loader, encoder, decoder, criterion, optimizer, vocab_size,
         # Pass the inputs through the CNN-RNN model
         features = encoder(images)
         outputs = decoder(features, captions)
-        pseudo_caption = torch.ones(captions.view(-1).shape[0], 8856)
+        pseudo_caption = torch.ones(captions.view(-1).shape[0], vocab_size)
         pseudo_caption = pseudo_caption.float()*-1
         for i in range(captions.view(-1).shape[0]):
           pseudo_caption[i][0] = captions.view(-1)[i]
@@ -77,10 +79,11 @@ def train(train_loader, encoder, decoder, criterion, optimizer, vocab_size,
             filename = os.path.join("./models", "train-model-{}{}.pkl".format(epoch, i_step))
             save_checkpoint(filename, encoder, decoder, optimizer, total_loss, epoch, i_step)
             start_train_time = time.time()
+        # break
             
     return total_loss / total_step
             
-def validate(val_loader, encoder, decoder, criterion, vocab, epoch, 
+def validate(vocab_size, val_loader, encoder, decoder, criterion, vocab, epoch, 
              total_step, start_step=1, start_loss=0.0, start_bleu=0.0):
     """Validate the model for one epoch using the provided parameters. 
     Return the epoch's average validation loss and Bleu-4 score."""
@@ -102,6 +105,8 @@ def validate(val_loader, encoder, decoder, criterion, vocab, epoch,
     # Disable gradient calculation because we are in inference mode
     with torch.no_grad():
         for i_step in range(start_step, total_step + 1):
+            # if i_step==10:
+            #     break
             # Randomly sample a caption length, and sample indices with that length
             indices = val_loader.dataset.get_indices()
             # Create a batch sampler to retrieve a batch with the sampled indices
@@ -145,7 +150,7 @@ def validate(val_loader, encoder, decoder, criterion, vocab, epoch,
             # Calculate the batch loss
             
             
-            pseudo_caption = torch.ones(captions.view(-1).shape[0], 8856)
+            pseudo_caption = torch.ones(captions.view(-1).shape[0], vocab_size)
             pseudo_caption = pseudo_caption.float()*-1
             for i in range(captions.view(-1).shape[0]):
               pseudo_caption[i][0] = captions.view(-1)[i]
@@ -171,6 +176,7 @@ def validate(val_loader, encoder, decoder, criterion, vocab, epoch,
                 filename = os.path.join("./models", "val-model-{}{}.pkl".format(epoch, i_step))
                 save_val_checkpoint(filename, encoder, decoder, total_loss, total_bleu_4, epoch, i_step)
                 start_val_time = time.time()
+            # break
                 
         return total_loss / total_step, total_bleu_4 / total_step
 
